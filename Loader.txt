@@ -1,0 +1,27 @@
+using System;
+using System.Collections.Generic;
+
+namespace PAM
+{
+	// Token: 0x02000003 RID: 3
+	public static class Loader
+	{
+		// Token: 0x06000004 RID: 4 RVA: 0x0000209F File Offset: 0x0000029F
+		public static void RegistryToGameCore(Action<GameContext> action)
+		{
+			Loader.listOfGameCore.Add(action);
+		}
+
+		// Token: 0x06000005 RID: 5 RVA: 0x000020AE File Offset: 0x000002AE
+		public static void RegistryToZoneCore(Action<SceneContext> action)
+		{
+			Loader.listOfZoneCore.Add(action);
+		}
+
+		// Token: 0x04000002 RID: 2
+		internal static List<Action<GameContext>> listOfGameCore = new List<Action<GameContext>>();
+
+		// Token: 0x04000003 RID: 3
+		internal static List<Action<SceneContext>> listOfZoneCore = new List<Action<SceneContext>>();
+	}
+}

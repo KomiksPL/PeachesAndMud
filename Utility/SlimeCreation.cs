@@ -2,7 +2,7 @@
 
 public static class SlimeCreation
 {
-    public static (SlimeDefinition, IdentifiableType) CreateSlimeAndPlortsDefinition(string name)
+    public static IdentifiableType[] CreateSlimeAndPlortsDefinition(string name)
     {
         SlimeDefinition slime = ScriptableObjectUtils.CreateScriptable<SlimeDefinition>(delegate(SlimeDefinition definition)
         {
@@ -24,9 +24,10 @@ public static class SlimeCreation
         });
 
         LookupRegistry.RegistryIdentifiable(slime);
-        //LookupRegistry.RegisterVaccable(slime);
+        LookupRegistry.RegistryVaccable(slime);
         LookupRegistry.RegistryIdentifiable(plort);
         //LookupRegistry.RegisterVaccable(plort);
-        return (slime, plort);
+
+        return new IdentifiableType[] {plort, slime };
     }
 }

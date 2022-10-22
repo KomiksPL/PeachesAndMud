@@ -7,23 +7,29 @@ using Object = UnityEngine.Object;
 
 namespace PAM.Identifiables.SlimesAndPlorts;
 
-public static class Bear
+public class BearSlime : IdentifiableTypeCreator
 {
-    public static void Build()
-    {
-	    string name = "Bear";
-        IdentifiableType plort = LookupRegistry.GetIdentifiableByName(name +"Plort");
+	public override string Name => "Bear";
+	
+
+	public override void Build()
+	{
+		if (identTypes is null)
+		{
+			"yes".LogMessage();
+		}
+		IdentifiableType plort = identTypes[0];
         GameObject plortPrefab = PrefabUtils.CopyPrefab(SRObjects.Get<GameObject>("plortPink"));
-        plortPrefab.name = "plort" + name;
+        plortPrefab.name = "plort" + Name;
         plortPrefab.GetComponent<Identifiable>().identType = plort;
         plortPrefab.GetComponent<Vacuumable>().size = Vacuumable.Size.NORMAL;
         var meshRenderer = plortPrefab.GetComponent<MeshRenderer>();
         plort.prefab = plortPrefab;
         
         PlortRegistry.RegisterPlort(plort, 120, 1);
-        SlimeDefinition slimeDefinition = LookupRegistry.GetIdentifiableByName(name).Cast<SlimeDefinition>();
+        SlimeDefinition slimeDefinition = identTypes[1].Cast<SlimeDefinition>();
 	    GameObject slime = PrefabUtils.CopyPrefab(SRObjects.Get<GameObject>("slimePink"));
-	    slime.name = "slime" + name;
+	    slime.name = "slime" + Name;
 	    
 	    SlimeDefinition identifiableType = slime.GetComponent<Identifiable>().identType.Cast<SlimeDefinition>();
 	    //slimeDefinition.Diet = identifiableType.Diet;
@@ -53,9 +59,7 @@ public static class Bear
 		    }
 	    };
 	    SlimeRegistry.RegistrySlimeDefinition(slimeDefinition);
-	    LookupRegistry.RegistryIdentifiable(slimeDefinition);
 
-	    
 	    slimeDefinition.nativeZones = identifiableType.nativeZones;
 	    slimeDefinition.Sounds = identifiableType.Sounds;
 	    slimeDefinition.properties = identifiableType.properties;
@@ -63,7 +67,7 @@ public static class Bear
 
 	    var definition = LookupRegistry.GetVanillaIdentifiableByName("Tabby").Cast<SlimeDefinition>();
 	    SlimeAppearance slimeAppearance = Object.Instantiate<SlimeAppearance>(definition.AppearancesDefault[0]);
-	    slimeAppearance.name = name + "Default";
+	    slimeAppearance.name = Name + "Default";
 	    slimeAppearance.Icon = slimeDefinition.icon;	
 	    
 	    var material = Object.Instantiate(definition.AppearancesDefault[0].Structures[0].DefaultMaterials[0]);
@@ -114,5 +118,7 @@ public static class Bear
 	    
     }
 
-    public static void BuildForAutoSave() => SlimeCreation.CreateSlimeAndPlortsDefinition("Bear");
+    public override IdentifiableType[] BuildIdentifiable() => SlimeCreation.CreateSlimeAndPlortsDefinition(Name);
+    
 }
+    

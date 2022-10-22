@@ -1,0 +1,63 @@
+using System;
+using DebuggingMod;
+using HarmonyLib;
+using Il2CppSystem.Collections.Generic;
+
+namespace PAM.Patches;
+
+[HarmonyPatch(typeof(AutoSaveDirector), nameof(AutoSaveDirector.Awake))]
+public static class PatchAutoSaveDirectorAwake
+{
+    public static List<IdentifiableType> vaccableIdentifiables = new List<IdentifiableType>();
+    public static void Prefix(AutoSaveDirector __instance)
+    {
+        foreach (var type in execAssembly.GetTypes())
+        {
+            if (type.Namespace != null && type.Namespace.Contains("Identifiables"))
+            {
+                type.GetMethod("BuildForAutoSave")?.Invoke(null, Array.Empty<object>());
+            }
+            
+        }
+        
+        var slimesGroup = SRObjects.Get<IdentifiableTypeGroup>("SlimesGroup");
+        var vaccableNonLiquids = SRObjects.Get<IdentifiableTypeGroup>("VaccableNonLiquids");
+        var vaccableBaseSlimeGroup = SRObjects.Get<IdentifiableTypeGroup>("VaccableBaseSlimeGroup");
+        var plortGroup = SRObjects.Get<IdentifiableTypeGroup>("PlortGroup");
+
+        foreach (var createdIdentifiable in Utilities.CreatedIdentifiables.Values)
+        {
+            var slimeDefinition = createdIdentifiable.TryCast<SlimeDefinition>();
+            if (slimeDefinition)
+            {
+                slimesGroup.memberTypes.Add(createdIdentifiable);
+            }
+            if (createdIdentifiable.IsPlort)
+                plortGroup.memberTypes.Add(createdIdentifiable);
+            if (!createdIdentifiable.name.Contains("Gordo"))
+            {
+                __instance.identifiableTypes.memberTypes.Add(createdIdentifiable);
+
+            }
+            else
+            {
+                
+            }
+            
+        }
+
+        foreach (var vaccableIdentifiable in vaccableIdentifiables)
+        {
+            var slimeDefinition = vaccableIdentifiable.TryCast<SlimeDefinition>();
+            if (slimeDefinition)
+            {
+                vaccableBaseSlimeGroup.memberTypes.Add(slimeDefinition);
+            }
+            else
+            {
+                vaccableNonLiquids.memberTypes.Add(vaccableIdentifiable);
+            }
+        }
+        
+    }
+}

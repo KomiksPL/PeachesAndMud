@@ -1,15 +1,22 @@
-﻿using PAM.Utility;
+﻿using System;
+using System.Linq;
+using DebuggingMod;
+using Il2CppMonomiPark.SlimeRancher.Slime;
+using PAM.Utility;
+using Object = UnityEngine.Object;
 
 namespace PAM.Identifiables.SlimesAndPlorts;
 
-public static class MudSlime
+public class MudSlime : IdentifiableTypeCreator
 {
-    public static void Build()
+	public override string Name => "Mud";
+
+	public override void Build()
     {
-        IdentifiableType mudPlort = LookupRegistry.GetIdentifiableByName("MudPlort");
+        IdentifiableType mudPlort = identTypes[0];
         
         GameObject plortPrefab = PrefabUtils.CopyPrefab(SRObjects.Get<GameObject>("plortPuddle"));
-        plortPrefab.name = "plortMud";
+        plortPrefab.name = "plort" + Name;
         plortPrefab.GetComponent<Identifiable>().identType = mudPlort;
         plortPrefab.GetComponent<Vacuumable>().size = Vacuumable.Size.NORMAL;
         Material material = Object.Instantiate(SRSingleton<GameContext>.Instance.SlimeDefinitions.GetSlimeByIdentifiableId(SRObjects.Get<IdentifiableType>("Puddle")).AppearancesDefault[0].Structures[0].DefaultMaterials[0]);
@@ -22,9 +29,9 @@ public static class MudSlime
         plortPrefab.GetComponent<MeshRenderer>().sharedMaterial = material;
         mudPlort.prefab = plortPrefab;
         PlortRegistry.RegisterPlort(mudPlort, 120, 1);
-        SlimeDefinition mudSlime = LookupRegistry.GetIdentifiableByName("Mud").Cast<SlimeDefinition>();
+        SlimeDefinition mudSlime = identTypes[1].Cast<SlimeDefinition>();
 	    GameObject slimeMud = PrefabUtils.CopyPrefab(SRObjects.Get<GameObject>("slimePuddle"));
-	    slimeMud.name = "slimeMud";
+	    slimeMud.name = "slime" + Name;
 	    
 	    SlimeDefinition identifiableType = slimeMud.GetComponent<Identifiable>().identType.Cast<SlimeDefinition>();
 	    mudSlime.Diet = identifiableType.Diet;
@@ -32,9 +39,8 @@ public static class MudSlime
 	    mudSlime.Sounds = identifiableType.Sounds;
 	    mudSlime.properties = identifiableType.properties;
 	    SlimeRegistry.RegistrySlimeDefinition(identifiableType);
-	    LookupRegistry.RegistryIdentifiable(identifiableType);
 	    SlimeAppearance slimeAppearance = Object.Instantiate<SlimeAppearance>(identifiableType.AppearancesDefault[0]);
-	    slimeAppearance.name = "MudDefault";
+	    slimeAppearance.name = Name + "Default";
 	    
 	    Material material3 = Object.Instantiate<Material>(identifiableType.AppearancesDefault[0].Structures[0].DefaultMaterials[0]);
 	    material3.hideFlags |= HideFlags.HideAndDontSave;
@@ -82,7 +88,19 @@ public static class MudSlime
 	    slimeEatWater.plort = mudPlort.prefab;
 	    mudSlime.prefab = slimeMud;
 	    SlimeRegistry.RegistrySlimeAppearance(identifiableType, slimeAppearance);
+	    var dietGroupHighlight = SRObjects.Get<DietGroupHighlight>("DietHighlight");
+	    dietGroupHighlight.slimeDietOverrideEntries.Add(new DietGroupHighlight.SlimeDietOverrideEntry()
+	    {
+		    icon = mudSlime.icon, slime = identTypes[1].Cast<SlimeDefinition>(), label = TranslationPatcher.AddTranslation("UI", "m.foodgroup.mud", "Mud"), 
+	    });
+	    
+	    
+	    SlimeRegistry.sceneActions.Add(context =>
+	    {
+		   
+	    } );
     }
 
-    public static void BuildForAutoSave() => SlimeCreation.CreateSlimeAndPlortsDefinition("Mud");
+    
+    public override IdentifiableType[] BuildIdentifiable() => SlimeCreation.CreateSlimeAndPlortsDefinition(Name);
 }

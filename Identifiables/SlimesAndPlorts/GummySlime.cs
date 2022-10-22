@@ -7,14 +7,15 @@ using Object = UnityEngine.Object;
 
 namespace PAM.Identifiables.SlimesAndPlorts;
 
-public static class GummySlime
+public class GummySlime : IdentifiableTypeCreator
 {
 
-	public static void Build()
+	public override string Name => "Gummy";
+	public override void Build()
     {
-        IdentifiableType plort = LookupRegistry.GetIdentifiableByName("GummyPlort");
+        IdentifiableType plort = identTypes[0];
         GameObject plortPrefab = PrefabUtils.CopyPrefab(SRObjects.Get<GameObject>("plortPink"));
-        plortPrefab.name = "plortGummy";
+        plortPrefab.name = "plort" + Name;
         plortPrefab.GetComponent<Identifiable>().identType = plort;
         plortPrefab.GetComponent<Vacuumable>().size = Vacuumable.Size.NORMAL;
         var meshRenderer = plortPrefab.GetComponent<MeshRenderer>();
@@ -22,9 +23,9 @@ public static class GummySlime
         
         
         PlortRegistry.RegisterPlort(plort, 120, 1);
-        SlimeDefinition slimeDefinition = LookupRegistry.GetIdentifiableByName("Gummy").Cast<SlimeDefinition>();
+        SlimeDefinition slimeDefinition = identTypes[1].Cast<SlimeDefinition>();
 	    GameObject slime = PrefabUtils.CopyPrefab(SRObjects.Get<GameObject>("slimePink"));
-	    slime.name = "slimeGummy";
+	    slime.name = "slime" + Name;
 	    
 	    SlimeDefinition identifiableType = slime.GetComponent<Identifiable>().identType.Cast<SlimeDefinition>();
 	    //slimeDefinition.Diet = identifiableType.Diet;
@@ -53,8 +54,7 @@ public static class GummySlime
 			    LookupRegistry.GetIdentifiableTypeGroup("VeggieGroup")
 		    }
 	    };
-	    SlimeRegistry.RegistrySlimeDefinition(slimeDefinition);
-	    LookupRegistry.RegistryIdentifiable(slimeDefinition);
+	    SlimeRegistry.RegistrySlimeDefinition(identifiableType);
 
 	    //Object.Instantiate(slimeDefinition.Diet);
 	    
@@ -67,7 +67,7 @@ public static class GummySlime
 
 
 	    SlimeAppearance slimeAppearance = Object.Instantiate<SlimeAppearance>(identifiableType.AppearancesDefault[0]);
-	    slimeAppearance.name = "GummyDefault";
+	    slimeAppearance.name = Name + "Default";
 	    slimeAppearance.Icon = slimeDefinition.icon;
 	    
 	    var material = Object.Instantiate(identifiableType.AppearancesDefault[0].Structures[0].DefaultMaterials[0]);
@@ -102,5 +102,7 @@ public static class GummySlime
 	    slimeDefinition.prefab = slime;
 	    SlimeRegistry.RegistrySlimeAppearance(identifiableType, slimeAppearance);
     }
-    public static void BuildForAutoSave() => SlimeCreation.CreateSlimeAndPlortsDefinition("Gummy");
+
+	public override IdentifiableType[] BuildIdentifiable() => SlimeCreation.CreateSlimeAndPlortsDefinition(Name);
+
 }

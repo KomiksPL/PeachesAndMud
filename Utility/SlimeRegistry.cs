@@ -16,8 +16,8 @@ public static class SlimeRegistry
         slimeAppearance.hideFlags |= HideFlags.HideAndDontSave;
         sceneActions.Add(context =>
         {
-            context.SlimeAppearanceDirector.UpdateChosenSlimeAppearance(identifiableType, slimeAppearance);
             context.SlimeAppearanceDirector.RegisterDependentAppearances(identifiableType, slimeAppearance);
+            context.SlimeAppearanceDirector.UpdateChosenSlimeAppearance(identifiableType, slimeAppearance);
         } );
     }
 

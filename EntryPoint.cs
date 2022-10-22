@@ -17,44 +17,48 @@ public class EntryPoint : MelonMod
 {
         
     public static Assembly execAssembly = Assembly.GetExecutingAssembly();
-    public static Type[] AllTypes = execAssembly.GetTypes();
+    public static Type[] AllTypes = execAssembly.GetTypes().Where(type => type.IsSubclassOf(typeof(IdentifiableTypeCreator)) && type.GetCustomAttribute<NoRegistryAttribute>() == null).ToArray();
     public override void OnInitializeMelon()
     {
 
+        
         Action<Scene, LoadSceneMode> loadScene = (scene, mode) =>
         {
-            if (scene.name.Equals("zoneCore"))
+            switch (scene)
             {
-                var sceneContext = SRSingleton<SceneContext>.Instance;
-                foreach (var sceneAction in SlimeRegistry.sceneActions)
+                case { name: "zoneCore" }:
                 {
-                    sceneAction(sceneContext);
-                }
-            }
-            if (scene.name.Equals("GameCore"))
-            {
-                foreach (var type in AllTypes)
-                {
-                    if (type.Namespace != null&& !type.Namespace.Contains("Identifiables")) continue;
-                    type.GetMethod("Build")?.Invoke(null, Array.Empty<object>());
-                }
-
-                foreach (var identifiables in LookupRegistry.createdIdentifiables.Values)
-                {
-                    var slimeDefinition = identifiables.TryCast<SlimeDefinition>();
-                    if (slimeDefinition)
+                    var sceneContext = SRSingleton<SceneContext>.Instance;
+                    foreach (var sceneAction in SlimeRegistry.sceneActions)
                     {
-                        var slimeDefinitions = SRSingleton<GameContext>.Instance.SlimeDefinitions;
-                    
-                        slimeDefinitions.Slimes = slimeDefinitions.Slimes.AddItem(slimeDefinition).ToArray();
-                        slimeDefinitions.slimeDefinitionsByIdentifiable.Add(slimeDefinition, slimeDefinition);
+                        sceneAction(sceneContext);
                     }
 
+                    break;
+                }
+                case { name: "GameCore" }:
+                {
+                    foreach (var identType in IdentifiableTypeCreator.identTypeCreators)
+                    {
+                        identType.Build();
+                    }
+                    foreach (var identifiables in LookupRegistry.createdIdentifiables.Values)
+                    {
+                        var slimeDefinition = identifiables.TryCast<SlimeDefinition>();
+                        if (slimeDefinition)
+                        {
+                            var slimeDefinitions = SRSingleton<GameContext>.Instance.SlimeDefinitions;
+                    
+                            slimeDefinitions.Slimes = slimeDefinitions.Slimes.AddItem(slimeDefinition).ToArray();
+                            slimeDefinitions.slimeDefinitionsByIdentifiable.Add(slimeDefinition, slimeDefinition);
+                        }
+                    }
+
+                   
+
+                    break;
                 }
             }
-
-          
-
         };
         SceneManager.add_sceneLoaded(loadScene);
     }

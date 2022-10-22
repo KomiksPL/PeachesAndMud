@@ -7,23 +7,24 @@ using Object = UnityEngine.Object;
 
 namespace PAM.Identifiables.SlimesAndPlorts;
 
-public static class PeachSlime
+public class PeachSlime : IdentifiableTypeCreator
 {
-    public static void Build()
+	public override string Name => "Peach";
+
+	public override void Build()
     {
-	    string name = "Peach";
-        IdentifiableType plort = LookupRegistry.GetIdentifiableByName(name +"Plort");
+        IdentifiableType plort = identTypes[0];
         GameObject plortPrefab = PrefabUtils.CopyPrefab(SRObjects.Get<GameObject>("plortPink"));
-        plortPrefab.name = "plort" + name;
+        plortPrefab.name = "plort" + Name;
         plortPrefab.GetComponent<Identifiable>().identType = plort;
         plortPrefab.GetComponent<Vacuumable>().size = Vacuumable.Size.NORMAL;
         var meshRenderer = plortPrefab.GetComponent<MeshRenderer>();
         plort.prefab = plortPrefab;
         
         PlortRegistry.RegisterPlort(plort, 120, 1);
-        SlimeDefinition slimeDefinition = LookupRegistry.GetIdentifiableByName(name).Cast<SlimeDefinition>();
+        SlimeDefinition slimeDefinition = identTypes[1].Cast<SlimeDefinition>();
 	    GameObject slime = PrefabUtils.CopyPrefab(SRObjects.Get<GameObject>("slimePink"));
-	    slime.name = "slime" + name;
+	    slime.name = "slime" + Name;
 	    slime.AddComponent<GroundVine>();
 	    
 	    SlimeDefinition identifiableType = slime.GetComponent<Identifiable>().identType.Cast<SlimeDefinition>();
@@ -51,10 +52,9 @@ public static class PeachSlime
 		    MajorFoodIdentifiableTypeGroups = new[]
 		    {
 			    LookupRegistry.GetIdentifiableTypeGroup("FruitGroup")
-		    }
+		    },
 	    };
-	    SlimeRegistry.RegistrySlimeDefinition(slimeDefinition);
-	    LookupRegistry.RegistryIdentifiable(slimeDefinition);
+	    SlimeRegistry.RegistrySlimeDefinition(identifiableType);
 
 	    slimeDefinition.nativeZones = identifiableType.nativeZones;
 	    slimeDefinition.Sounds = identifiableType.Sounds;
@@ -62,7 +62,7 @@ public static class PeachSlime
 
 	    
 	    SlimeAppearance slimeAppearance = Object.Instantiate<SlimeAppearance>(LookupRegistry.GetVanillaIdentifiableByName("Tangle").Cast<SlimeDefinition>().AppearancesDefault[0]);
-	    slimeAppearance.name = name + "Default";
+	    slimeAppearance.name = Name + "Default";
 	    slimeAppearance.Icon = slimeDefinition.icon;	
 	    
 	    var material = Object.Instantiate(identifiableType.AppearancesDefault[0].Structures[0].DefaultMaterials[0]);
@@ -107,9 +107,9 @@ public static class PeachSlime
 	    slime.GetComponent<Identifiable>().identType = slimeDefinition;
 	    SlimeEat slimeEat = slime.GetComponent<SlimeEat>();
 	    slimeEat.slimeDefinition = slimeDefinition;
-	    slimeDefinition.prefab = slime;
+	    slimeDefinition.prefab = slime; 
 	    SlimeRegistry.RegistrySlimeAppearance(identifiableType, slimeAppearance);
     }
 
-    public static void BuildForAutoSave() => SlimeCreation.CreateSlimeAndPlortsDefinition("Peach");
+	public override IdentifiableType[] BuildIdentifiable() =>  SlimeCreation.CreateSlimeAndPlortsDefinition("Peach");
 }
